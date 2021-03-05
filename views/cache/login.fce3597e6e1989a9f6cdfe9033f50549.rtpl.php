@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<?php if(!class_exists('Rain\Tpl')){exit;}?><!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -97,7 +97,7 @@
         </div>
         <!-- /.social-auth-links -->
 
-        <a href="/admin/forogot">Esqueci minha senha</a><br />
+        <a href="/admin/forgot">Esqueci minha senha</a><br />
         <a href="register.html" class="text-center"
           >Register a new membership</a
         >
