@@ -1,4 +1,5 @@
 <?php
+
 namespace Hcode;
 
 class Model {
@@ -34,6 +35,7 @@ class Model {
 
 	public function getValues() {
 		return $this->values;
+
 	}
 
 }

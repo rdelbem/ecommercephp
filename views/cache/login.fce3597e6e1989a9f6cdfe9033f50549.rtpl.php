@@ -97,7 +97,7 @@
         </div>
         <!-- /.social-auth-links -->
 
-        <a href="/admin/forgot">Esqueci minha senha</a><br />
+        <a href="/admin/forogot">Esqueci minha senha</a><br />
         <a href="register.html" class="text-center"
           >Register a new membership</a
         >
