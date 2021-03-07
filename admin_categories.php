@@ -3,7 +3,7 @@
 use \Hcode\PageAdmin;
 use \Hcode\Model\User;
 use \Hcode\Model\Category;
-use \Hcode\Model\Product;
+use \Hcode\Model\Products;
 
 $app->get(
 	'/admin/categories',
@@ -149,39 +149,69 @@ $app->post(
 );
 
 $app->get(
-	'/categories/:idcategory',
+	'/admin/categories/:idcategory/products',
 	function( $idcategory ) {
 
-		$page = ( isset( $_GET['page'] ) ) ? (int) $_GET['page'] : 1;
+		User::verifyLogin();
 
 		$category = new Category();
 
 		$category->get( (int) $idcategory );
 
-		$pagination = $category->getProductsPage( $page );
-
-		$pages = array();
-
-		for ( $i = 1; $i <= $pagination['pages']; $i++ ) {
-			array_push(
-				$pages,
-				array(
-					'link' => '/categories/' . $category->getidcategory() . '?page=' . $i,
-					'page' => $i,
-				)
-			);
-		}
-
-		$page = new Page();
+		$page = new PageAdmin();
 
 		$page->setTpl(
-			'category',
+			'categories-products',
 			array(
-				'category' => $category->getValues(),
-				'products' => $pagination['data'],
-				'pages'    => $pages,
+				'category'           => $category->getValues(),
+				'productsRelated'    => $category->getProducts(),
+				'productsNotRelated' => $category->getProducts( false ),
 			)
 		);
+
+	}
+);
+
+$app->get(
+	'/admin/categories/:idcategory/products/:idproduct/add',
+	function( $idcategory, $idproduct ) {
+
+		User::verifyLogin();
+
+		$category = new Category();
+
+		$category->get( (int) $idcategory );
+
+		$product = new Products();
+
+		$product->get( (int) $idproduct );
+
+		$category->addProduct( $product );
+
+		header( 'Location: /admin/categories/' . $idcategory . '/products' );
+		exit;
+
+	}
+);
+
+$app->get(
+	'/admin/categories/:idcategory/products/:idproduct/remove',
+	function( $idcategory, $idproduct ) {
+
+		User::verifyLogin();
+
+		$category = new Category();
+
+		$category->get( (int) $idcategory );
+
+		$product = new Products();
+
+		$product->get( (int) $idproduct );
+
+		$category->removeProduct( $product );
+
+		header( 'Location: /admin/categories/' . $idcategory . '/products' );
+		exit;
 
 	}
 );

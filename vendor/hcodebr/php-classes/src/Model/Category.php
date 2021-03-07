@@ -5,6 +5,7 @@ namespace Hcode\Model;
 use \Hcode\DB\Sql;
 use \Hcode\Model;
 use \Hcode\Mailer;
+use \Hcode\Model\Products;
 
 class Category extends Model {
 
@@ -133,14 +134,14 @@ class Category extends Model {
 		$resultTotal = $sql->select( 'SELECT FOUND_ROWS() AS nrtotal;' );
 
 		return array(
-			'data'  => Product::checkList( $results ),
+			'data'  => Products::checkList( $results ),
 			'total' => (int) $resultTotal[0]['nrtotal'],
 			'pages' => ceil( $resultTotal[0]['nrtotal'] / $itemsPerPage ),
 		);
 
 	}
 
-	public function addProduct( Product $product ) {
+	public function addProduct( Products $product ) {
 		$sql = new Sql();
 
 		$sql->query(
@@ -153,7 +154,7 @@ class Category extends Model {
 
 	}
 
-	public function removeProduct( Product $product ) {
+	public function removeProduct( Products $product ) {
 		$sql = new Sql();
 
 		$sql->query(
