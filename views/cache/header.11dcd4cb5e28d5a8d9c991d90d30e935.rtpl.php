@@ -58,7 +58,7 @@
                   <a href="#"><i class="fa fa-heart"></i> Lista de Desejos</a>
                 </li>
                 <li>
-                  <a href="#"
+                  <a href="/cart"
                     ><i class="fa fa-shopping-cart"></i> Meu Carrinho</a
                   >
                 </li>
@@ -116,14 +116,14 @@
           <div class="col-sm-6">
             <div class="logo">
               <h1>
-                <a href="#"><img src="views/res/site/img/logo.png" /></a>
+                <a href="/"><img src="../views/res/site/img/logo.png" /></a>
               </h1>
             </div>
           </div>
 
           <div class="col-sm-6">
             <div class="shopping-item">
-              <a href="carrinho.html"
+              <a href="/cart"
                 >Carrinho - <span class="cart-amunt">R$100</span>
                 <i class="fa fa-shopping-cart"></i>
                 <span class="product-count">5</span></a
@@ -153,12 +153,14 @@
           </div>
           <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-              <li class="active"><a href="#">Home</a></li>
+              <li class="active"><a href="/">Home</a></li>
               <li><a href="#">Produtos</a></li>
-              <li><a href="#">Carrinho</a></li>
+              <li><a href="/cart">Carrinho</a></li>
             </ul>
           </div>
         </div>
       </div>
     </div>
     <!-- End mainmenu area -->
+  </body>
+</html>

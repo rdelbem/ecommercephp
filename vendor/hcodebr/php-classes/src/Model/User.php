@@ -7,9 +7,55 @@ use \Hcode\Model;
 
 class User extends Model {
 
-	const SESSION   = 'User';
-	const SECRET    = 'HcodePhp7_Secret';
-	const SECRET_IV = 'HcodePhp7_Secret_IV';
+	const SESSION        = 'User';
+	const SECRET         = 'HcodePhp7_Secret';
+	const SECRET_IV      = 'HcodePhp7_Secret_IV';
+	const ERROR          = 'UserError';
+	const ERROR_REGISTER = 'UserErrorRegister';
+	const SUCCESS        = 'UserSucesss';
+
+	public static function getFromSession() {
+		$user = new User();
+
+		if ( isset( $_SESSION[ self::SESSION ] ) && (int) $_SESSION[ self::SESSION ]['iduser'] > 0 ) {
+
+			$user->setData( $_SESSION[ self::SESSION ] );
+
+		}
+
+		return $user;
+
+	}
+
+	public static function checkLogin( $inadmin = true ) {
+		if (
+			! isset( $_SESSION[ self::SESSION ] )
+			||
+			! $_SESSION[ self::SESSION ]
+			||
+			! (int) $_SESSION[ self::SESSION ]['iduser'] > 0
+		) {
+			// Não está logado
+			return false;
+
+		} else {
+
+			if ( $inadmin === true && (bool) $_SESSION[ self::SESSION ]['inadmin'] === true ) {
+
+				return true;
+
+			} elseif ( $inadmin === false ) {
+
+				return true;
+
+			} else {
+
+				return false;
+
+			}
+		}
+
+	}
 
 	public static function login( $login, $password ) {
 
@@ -49,16 +95,17 @@ class User extends Model {
 	}
 
 	public static function verifyLogin( $inadmin = true ) {
-		if ( ! isset( $_SESSION[ self::SESSION ] ) ||
-			! $_SESSION[ self::SESSION ] ||
-			! (int) $_SESSION[ self::SESSION ]['iduser'] > 0 ||
-			(bool) $_SESSION[ self::SESSION ]['inadmin'] !== $inadmin
-			) {
+		if ( ! self::checkLogin( $inadmin ) ) {
 
-			header( 'Location: /admin/longin' );
-
+			if ( $inadmin ) {
+				header( 'Location: /admin/login' );
+			} else {
+				header( 'Location: /login' );
+			}
 			exit;
+
 		}
+
 	}
 
 	public static function logout() {
