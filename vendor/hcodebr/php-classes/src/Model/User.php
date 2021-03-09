@@ -4,6 +4,7 @@ namespace Hcode\Model;
 
 use \Hcode\DB\Sql;
 use \Hcode\Model;
+use \Hcode\Mailer;
 
 class User extends Model {
 
@@ -58,27 +59,26 @@ class User extends Model {
 	}
 
 	public static function login( $login, $password ) {
-
 		$sql = new Sql();
 
-		$result = $sql->select(
-			'SELECT * FROM tb_users WHERE deslogin = :LOGIN',
+		$results = $sql->select(
+			'SELECT * FROM tb_users a INNER JOIN tb_persons b ON a.idperson = b.idperson WHERE a.deslogin = :LOGIN',
 			array(
-
 				':LOGIN' => $login,
-
 			)
 		);
 
-		if ( count( $result ) === 0 ) {
-			throw new \Exception( 'Usuário inexistente ou senha inválida', 1 );
+		if ( count( $results ) === 0 ) {
+			throw new \Exception( 'Usuário inexistente ou senha inválida.' );
 		}
 
-		$data = $result[0];
+		$data = $results[0];
 
 		if ( password_verify( $password, $data['despassword'] ) === true ) {
 
 			$user = new User();
+
+			$data['desperson'] = utf8_encode( $data['desperson'] );
 
 			$user->setData( $data );
 
@@ -87,9 +87,7 @@ class User extends Model {
 			return $user;
 
 		} else {
-
-			throw new \Exception( 'Usuário inexistente ou senha inválida', 1 );
-
+			throw new \Exception( 'Usuário inexistente ou senha inválida.' );
 		}
 
 	}
@@ -110,11 +108,13 @@ class User extends Model {
 
 	public static function logout() {
 		$_SESSION[ self::SESSION ] = null;
+
 	}
 
 	public static function listAll() {
 		$sql = new Sql();
-		 return $sql->select( 'SELECT * FROM tb_users a INNER JOIN tb_persons b USING(idperson) ORDER BY b.desperson' );
+
+		return $sql->select( 'SELECT * FROM tb_users a INNER JOIN tb_persons b USING(idperson) ORDER BY b.desperson' );
 
 	}
 
@@ -126,7 +126,7 @@ class User extends Model {
 			array(
 				':desperson'   => utf8_decode( $this->getdesperson() ),
 				':deslogin'    => $this->getdeslogin(),
-				':despassword' => $this->getdespassword(),
+				':despassword' => self::getPasswordHash( $this->getdespassword() ),
 				':desemail'    => $this->getdesemail(),
 				':nrphone'     => $this->getnrphone(),
 				':inadmin'     => $this->getinadmin(),
@@ -149,6 +149,8 @@ class User extends Model {
 
 		$data = $results[0];
 
+		$data['desperson'] = utf8_encode( $data['desperson'] );
+
 		$this->setData( $data );
 
 	}
@@ -162,7 +164,7 @@ class User extends Model {
 				':iduser'      => $this->getiduser(),
 				':desperson'   => utf8_decode( $this->getdesperson() ),
 				':deslogin'    => $this->getdeslogin(),
-				':despassword' => $this->getdespassword(),
+				':despassword' => self::getPasswordHash( $this->getdespassword() ),
 				':desemail'    => $this->getdesemail(),
 				':nrphone'     => $this->getnrphone(),
 				':inadmin'     => $this->getinadmin(),
@@ -230,18 +232,18 @@ class User extends Model {
 
 				if ( $inadmin === true ) {
 
-					$link = "http://www.ecommercephp.com/admin/forgot/reset?code=$code";
+					$link = "http://www.hcodecommerce.com.br/admin/forgot/reset?code=$code";
 
 				} else {
 
-					$link = "http://www.ecommercephp.com/forgot/reset?code=$code";
+					$link = "http://www.hcodecommerce.com.br/forgot/reset?code=$code";
 
 				}
 
 				$mailer = new Mailer(
 					$data['desemail'],
 					$data['desperson'],
-					'Redefinir senha',
+					'Redefinir senha da Hcode Store',
 					'forgot',
 					array(
 						'name' => $data['desperson'],
@@ -318,6 +320,77 @@ class User extends Model {
 
 	}
 
+	public static function setError( $msg ) {
+		$_SESSION[ self::ERROR ] = $msg;
+
+	}
+
+	public static function getError() {
+		$msg = ( isset( $_SESSION[ self::ERROR ] ) && $_SESSION[ self::ERROR ] ) ? $_SESSION[ self::ERROR ] : '';
+
+		self::clearError();
+
+		return $msg;
+
+	}
+
+	public static function clearError() {
+		$_SESSION[ self::ERROR ] = null;
+
+	}
+
+	public static function setSuccess( $msg ) {
+		$_SESSION[ self::SUCCESS ] = $msg;
+
+	}
+
+	public static function getSuccess() {
+		$msg = ( isset( $_SESSION[ self::SUCCESS ] ) && $_SESSION[ self::SUCCESS ] ) ? $_SESSION[ self::SUCCESS ] : '';
+
+		self::clearSuccess();
+
+		return $msg;
+
+	}
+
+	public static function clearSuccess() {
+		$_SESSION[ self::SUCCESS ] = null;
+
+	}
+
+	public static function setErrorRegister( $msg ) {
+		$_SESSION[ self::ERROR_REGISTER ] = $msg;
+
+	}
+
+	public static function getErrorRegister() {
+		$msg = ( isset( $_SESSION[ self::ERROR_REGISTER ] ) && $_SESSION[ self::ERROR_REGISTER ] ) ? $_SESSION[ self::ERROR_REGISTER ] : '';
+
+		self::clearErrorRegister();
+
+		return $msg;
+
+	}
+
+	public static function clearErrorRegister() {
+		$_SESSION[ self::ERROR_REGISTER ] = null;
+
+	}
+
+	public static function checkLoginExist( $login ) {
+		$sql = new Sql();
+
+		$results = $sql->select(
+			'SELECT * FROM tb_users WHERE deslogin = :deslogin',
+			array(
+				':deslogin' => $login,
+			)
+		);
+
+		return ( count( $results ) > 0 );
+
+	}
+
 	public static function getPasswordHash( $password ) {
 		return password_hash(
 			$password,
@@ -325,6 +398,83 @@ class User extends Model {
 			array(
 				'cost' => 12,
 			)
+		);
+
+	}
+
+	public function getOrders() {
+		$sql = new Sql();
+
+		$results = $sql->select(
+			'
+			SELECT * 
+			FROM tb_orders a 
+			INNER JOIN tb_ordersstatus b USING(idstatus) 
+			INNER JOIN tb_carts c USING(idcart)
+			INNER JOIN tb_users d ON d.iduser = a.iduser
+			INNER JOIN tb_addresses e USING(idaddress)
+			INNER JOIN tb_persons f ON f.idperson = d.idperson
+			WHERE a.iduser = :iduser
+		',
+			array(
+				':iduser' => $this->getiduser(),
+			)
+		);
+
+		return $results;
+
+	}
+
+	public static function getPage( $page = 1, $itemsPerPage = 10 ) {
+		$start = ( $page - 1 ) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$results = $sql->select(
+			"
+			SELECT SQL_CALC_FOUND_ROWS *
+			FROM tb_users a 
+			INNER JOIN tb_persons b USING(idperson) 
+			ORDER BY b.desperson
+			LIMIT $start, $itemsPerPage;
+		"
+		);
+
+		$resultTotal = $sql->select( 'SELECT FOUND_ROWS() AS nrtotal;' );
+
+		return array(
+			'data'  => $results,
+			'total' => (int) $resultTotal[0]['nrtotal'],
+			'pages' => ceil( $resultTotal[0]['nrtotal'] / $itemsPerPage ),
+		);
+
+	}
+
+	public static function getPageSearch( $search, $page = 1, $itemsPerPage = 10 ) {
+		$start = ( $page - 1 ) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$results = $sql->select(
+			"
+			SELECT SQL_CALC_FOUND_ROWS *
+			FROM tb_users a 
+			INNER JOIN tb_persons b USING(idperson)
+			WHERE b.desperson LIKE :search OR b.desemail = :search OR a.deslogin LIKE :search
+			ORDER BY b.desperson
+			LIMIT $start, $itemsPerPage;
+		",
+			array(
+				':search' => '%' . $search . '%',
+			)
+		);
+
+		$resultTotal = $sql->select( 'SELECT FOUND_ROWS() AS nrtotal;' );
+
+		return array(
+			'data'  => $results,
+			'total' => (int) $resultTotal[0]['nrtotal'],
+			'pages' => ceil( $resultTotal[0]['nrtotal'] / $itemsPerPage ),
 		);
 
 	}
