@@ -19,7 +19,9 @@
         <div class="product-content-right">
           <div class="woocommerce">
             <form action="/checkout">
-              <div class="alert alert-danger" role="alert">Error!</div>
+              {if="$error != ''"}
+              <div class="alert alert-danger" role="alert">{$error}</div>
+              {/if}
 
               <table cellspacing="0" class="shop_table cart">
                 <thead>
@@ -33,28 +35,36 @@
                   </tr>
                 </thead>
                 <tbody>
+                  {loop="$products"}
                   <tr class="cart_item">
                     <td class="product-remove">
-                      <a title="Remove this item" class="remove" href="#">×</a>
+                      <a
+                        title="Remove this item"
+                        class="remove"
+                        href="/cart/{$value.idproduct}/remove"
+                        >×</a
+                      >
                     </td>
 
                     <td class="product-thumbnail">
-                      <a href="#"
+                      <a href="/products/{$value.desurl}"
                         ><img
                           width="145"
                           height="145"
                           alt="poster_1_up"
                           class="shop_thumbnail"
-                          src="/res/site/img/product-thumb-2.jpg"
+                          src="{$value.desphoto}"
                       /></a>
                     </td>
 
                     <td class="product-name">
-                      <a href="#">Ship Your Idea</a>
+                      <a href="/product/{$value.desurl}">{$value.desproduct}</a>
                     </td>
 
                     <td class="product-price">
-                      <span class="amount">$700.00</span>
+                      <span class="amount"
+                        >R${function="formatPrice($value.vlprice)"}</span
+                      >
                     </td>
 
                     <td class="product-quantity">
@@ -63,14 +73,14 @@
                           type="button"
                           class="minus"
                           value="-"
-                          onclick="window.location.href = '#'"
+                          onclick="window.location.href = '/cart/{$value.idproduct}/minus'"
                         />
                         <input
                           type="number"
                           size="4"
                           class="input-text qty text"
                           title="Qty"
-                          value="1"
+                          value="{$value.nrqtd}"
                           min="0"
                           step="1"
                         />
@@ -78,15 +88,18 @@
                           type="button"
                           class="plus"
                           value="+"
-                          onclick="window.location.href = '#'"
+                          onclick="window.location.href = '/cart/{$value.idproduct}/add'"
                         />
                       </div>
                     </td>
 
                     <td class="product-subtotal">
-                      <span class="amount">$700.00</span>
+                      <span class="amount"
+                        >R${function="formatPrice($value.vltotal)"}</span
+                      >
                     </td>
                   </tr>
+                  {/loop}
                 </tbody>
               </table>
 
@@ -99,7 +112,7 @@
                     <input
                       type="text"
                       placeholder="00000-000"
-                      value=""
+                      value="{$cart.deszipcode}"
                       id="cep"
                       class="input-text"
                       name="zipcode"
@@ -121,18 +134,30 @@
                     <tbody>
                       <tr class="cart-subtotal">
                         <th>Subtotal</th>
-                        <td><span class="amount">$700.00</span></td>
+                        <td>
+                          <span class="amount"
+                            >R${function="formatPrice($cart.vlsubtotal)"}</span
+                          >
+                        </td>
                       </tr>
 
                       <tr class="shipping">
                         <th>Frete</th>
-                        <td>$5.00 <small>prazo de 0 dia(s)</small></td>
+                        <td>
+                          R${function="formatPrice($cart.vlfreight)"}{if="$cart.nrdays
+                          > 0"}
+                          <small>prazo de {$cart.nrdays} dia(s)</small>{/if}
+                        </td>
                       </tr>
 
                       <tr class="order-total">
                         <th>Total</th>
                         <td>
-                          <strong><span class="amount">$705.00</span></strong>
+                          <strong
+                            ><span class="amount"
+                              >R${function="formatPrice($cart.vltotal)"}</span
+                            ></strong
+                          >
                         </td>
                       </tr>
                     </tbody>

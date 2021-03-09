@@ -96,22 +96,22 @@ class Cart extends Model {
 		$sql = new Sql();
 
 		$results = $sql->select(
-			'CALL sp_carts_save(:idcart, :dessessionid, :iduser, :deszipcode, :vlfreight, :nrdays)',
+			'CALL sp_carts_save(:idcart, :dessessionid, :iduser, :vlfreight, :deszipcode, :nrdays)',
 			array(
 				':idcart'       => $this->getidcart(),
 				':dessessionid' => $this->getdessessionid(),
 				':iduser'       => $this->getiduser(),
-				':deszipcode'   => $this->getdeszipcode(),
 				':vlfreight'    => $this->getvlfreight(),
+				':deszipcode'   => $this->getdeszipcode(),
 				':nrdays'       => $this->getnrdays(),
 			)
 		);
 
-		$this->setData( $results[0] );
-
+		// $this->setData( $results[0] );
+		var_dump( $results );
 	}
 
-	public function addProduct( Product $product ) {
+	public function addProduct( Products $product ) {
 		$sql = new Sql();
 
 		$sql->query(
@@ -126,7 +126,7 @@ class Cart extends Model {
 
 	}
 
-	public function removeProduct( Product $product, $all = false ) {
+	public function removeProduct( Products $product, $all = false ) {
 		$sql = new Sql();
 
 		if ( $all ) {
@@ -172,7 +172,7 @@ class Cart extends Model {
 			)
 		);
 
-		return Product::checkList( $rows );
+		return Products::checkList( $rows );
 
 	}
 

@@ -36,7 +36,7 @@
                   <ins>R$<?php echo formatPrice($product["vlprice"]); ?></ins>
                 </div>
 
-                <form action="" class="cart">
+                <form action="/cart/<?php echo htmlspecialchars( $product["idproduct"], ENT_COMPAT, 'UTF-8', FALSE ); ?>/add" class="cart">
                   <div class="quantity">
                     <input
                       type="number"
@@ -44,7 +44,7 @@
                       class="input-text qty text"
                       title="Qty"
                       value="1"
-                      name="quantity"
+                      name="qtd"
                       min="1"
                       step="1"
                     />
