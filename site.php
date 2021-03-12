@@ -687,3 +687,53 @@ $app->get(
 
 	}
 );
+
+$app->get(
+	'/profile/orders',
+	function() {
+
+		User::verifyLogin( false );
+
+		$user = User::getFromSession();
+
+		$page = new Page();
+
+		$page->setTpl(
+			'profile-orders',
+			array(
+				'orders' => $user->getOrders(),
+			)
+		);
+
+	}
+);
+
+$app->get(
+	'/profile/orders/:idorder',
+	function( $idorder ) {
+
+		User::verifyLogin( false );
+
+		$order = new Order();
+
+		$order->get( (int) $idorder );
+
+		$cart = new Cart();
+
+		$cart->get( (int) $order->getidcart() );
+
+		$cart->getCalculateTotal();
+
+		$page = new Page();
+
+		$page->setTpl(
+			'profile-orders-detail',
+			array(
+				'order'    => $order->getValues(),
+				'cart'     => $cart->getValues(),
+				'products' => $cart->getProducts(),
+			)
+		);
+
+	}
+);
